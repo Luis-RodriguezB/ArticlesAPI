@@ -13,7 +13,7 @@ public interface IArticleRepository : IRepositoryBase<Article>
     Task<IEnumerable<Article>> GetAll(ArticleFilter articleFilter);
     Task<IEnumerable<Article>> GetAll(ArticleFilter articleFilter, IQueryable<Article> queryable);
     Task<IEnumerable<Article>> Search(ArticleFilter articleFilter);
-    Task<IEnumerable<Article>> GetAllByPersonId(int personId);
+    Task<IEnumerable<Article>> GetAllByPersonId(int personId, ArticleFilter articleFilter);
     Task<Article> GetByIdAndPersonId(int id, int personId);   
     Task<bool> IsArticleBelongPerson(int id, int personId);
 }
@@ -32,7 +32,7 @@ public class ArticleRepository(ApplicationDbContext context, IHttpContextAccesso
 
     public async Task<IEnumerable<Article>> GetAll(ArticleFilter articleFilter)
     {
-        IQueryable<Article> queryable = GetArticleQueryable().AsNoTracking();
+        IQueryable<Article> queryable = GetArticleQueryableFilter(articleFilter).AsNoTracking();
         return await GetAll(articleFilter, queryable);
     }
 
@@ -50,19 +50,18 @@ public class ArticleRepository(ApplicationDbContext context, IHttpContextAccesso
         return await GetAll(articleFilter, articleQueryable);
     }
 
-    public async Task<IEnumerable<Article>> GetAllByPersonId(int personId)
+    public async Task<IEnumerable<Article>> GetAllByPersonId(int personId, ArticleFilter articleFilter)
     {
-        IQueryable<Article> articleQueryable = GetArticleQueryable();
-
-        return await articleQueryable
+        IQueryable<Article> articleQueryable = GetArticleQueryableFilter(articleFilter);
+        articleQueryable =  articleQueryable
             .Where(a => a.PersonId == personId)
-            .OrderByDescending(a => a.CreatedAt)
-            .AsNoTracking()
-            .ToListAsync();
+            .AsNoTracking();
+
+        return await GetAll(articleFilter, articleQueryable);
     }
 
     public async Task<Article> GetById(int id)
-    {
+    {  
         return await GetArticleQueryable()
             .FirstOrDefaultAsync(x => x.Id == id);
     }
@@ -113,7 +112,7 @@ public class ArticleRepository(ApplicationDbContext context, IHttpContextAccesso
             .AnyAsync(x => x.Id == id && x.PersonId == personId);
     }
 
-    private IQueryable<Article> GetArticleQueryableFilter(ArticleFilter articleFilter = null)
+    private IQueryable<Article> GetArticleQueryableFilter(ArticleFilter articleFilter)
     {
         IQueryable<Article> articlesQueryable = GetArticleQueryable();
 
@@ -127,6 +126,16 @@ public class ArticleRepository(ApplicationDbContext context, IHttpContextAccesso
             if (articleFilter.Date != null)
             {
                 articlesQueryable = articlesQueryable.Where(x => x.CreatedAt <= articleFilter.Date);
+            }
+
+            if (articleFilter.OrderBy != null)
+            {
+                articlesQueryable = articleFilter.OrderBy == "asc" 
+                    ? articlesQueryable.OrderBy(x => x.CreatedAt) 
+                    : articlesQueryable.OrderByDescending(x => x.CreatedAt);
+            } else
+            {
+                articlesQueryable = articlesQueryable.OrderByDescending(x => x.CreatedAt);
             }
         }
 

@@ -1,6 +1,5 @@
 ﻿using ArticlesAPI.DTOs.Article;
 using ArticlesAPI.DTOs.Filters;
-using ArticlesAPI.DTOs.Others;
 using ArticlesAPI.HandleErrors;
 using AutoMapper;
 using BlogApi;
@@ -15,7 +14,6 @@ public interface IArticleService
     Task<List<ArticleDTO>> GetAll();
     Task<List<ArticleDTO>> GetAll(ArticleFilter articleFilter);
     Task<List<ArticleDTO>> Search(ArticleFilter articleFilter);
-    Task<List<ArticleDTO>> GetAllByPersonId(int personId);
     Task<ArticleDTO> GetById(int id);
     Task<ArticleDTO> Save(ArticleCreateDTO entity);
     Task Update(int id, ArticleUpdateDTO entity, string userId);
@@ -56,13 +54,6 @@ public class ArticleService : IArticleService
     public async Task<List<ArticleDTO>> Search(ArticleFilter articleFilter)
     {
         var articles = await articleRepository.Search(articleFilter);
-
-        return mapper.Map<List<ArticleDTO>>(articles);
-    }
-
-    public async Task<List<ArticleDTO>> GetAllByPersonId(int personId)
-    {
-        var articles = await articleRepository.GetAllByPersonId(personId);
 
         return mapper.Map<List<ArticleDTO>>(articles);
     }

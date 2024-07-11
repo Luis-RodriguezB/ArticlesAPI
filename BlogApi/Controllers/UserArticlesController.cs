@@ -1,4 +1,5 @@
-﻿using ArticlesAPI.HandleErrors;
+﻿using ArticlesAPI.DTOs.Filters;
+using ArticlesAPI.HandleErrors;
 using ArticlesAPI.Services;
 using BlogApi.DTOs.Blog;
 using Microsoft.AspNetCore.Mvc;
@@ -17,11 +18,11 @@ public class UserArticlesController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<ArticleDTO>>> Get(int personId)
+    public async Task<ActionResult<List<ArticleDTO>>> Get(int personId, [FromQuery] ArticleFilter articleFilter)
     {
         try
         {
-            return await userArticleService.GetArticlesByPersonId(personId);
+            return await userArticleService.GetArticlesByPersonId(personId, articleFilter);
         }
         catch (NotFoundException ex)
         {
