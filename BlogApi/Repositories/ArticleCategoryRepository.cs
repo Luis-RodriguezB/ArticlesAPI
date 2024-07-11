@@ -88,6 +88,8 @@ public class ArticleCategoryRepository : IArticleCategoryRepository
 
     public async Task<bool> Exist(ArticleCategory entity)
     {
-        return await context.ArticleCategories.AnyAsync(x => x.ArticleId == entity.ArticleId && x.CategoryId == entity.CategoryId);
+        return await context.ArticleCategories
+            .AsNoTracking()
+            .AnyAsync(x => x.ArticleId == entity.ArticleId && x.CategoryId == entity.CategoryId);
     }
 }

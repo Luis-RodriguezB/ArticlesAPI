@@ -2,6 +2,7 @@
 using ArticlesAPI.DTOs.Others;
 using ArticlesAPI.Helpers;
 using ArticlesAPI.Interfaces;
+using ArticlesAPI.Utils;
 using BlogApi.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,9 +10,11 @@ namespace BlogApi.Repositories;
 
 public interface IArticleRepository : IRepositoryBase<Article>
 {
-    Task<IEnumerable<Article>> GetAll(PaginationDTO paginationDTO);
-    Task<IEnumerable<Article>> GetAll(PaginationDTO paginationDTO, IQueryable<Article> queryable);
+    Task<IEnumerable<Article>> GetAll(ArticleFilter articleFilter);
+    Task<IEnumerable<Article>> GetAll(ArticleFilter articleFilter, IQueryable<Article> queryable);
     Task<IEnumerable<Article>> Search(ArticleFilter articleFilter);
+    Task<IEnumerable<Article>> GetAllByPersonId(int personId);
+    Task<Article> GetByIdAndPersonId(int id, int personId);   
     Task<bool> IsArticleBelongPerson(int id, int personId);
 }
 
@@ -22,63 +25,54 @@ public class ArticleRepository(ApplicationDbContext context, IHttpContextAccesso
 
     public async Task<IEnumerable<Article>> GetAll()
     {
-        return await _context.Articles
-            .Include(a => a.Person)
-            .ThenInclude(p => p.User)
-            .Include(a => a.ArticleCategories)
-            .ThenInclude(ac => ac.Category)
+        return await GetArticleQueryable()
             .AsNoTracking()
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<Article>> GetAll(PaginationDTO paginationDTO)
+    public async Task<IEnumerable<Article>> GetAll(ArticleFilter articleFilter)
     {
-        var queryable = _context.Articles
-            .Include(a => a.Person)
-            .ThenInclude(p => p.User)
-            .Include(a => a.ArticleCategories)
-            .ThenInclude(ac => ac.Category)
-            .AsQueryable();
-        return await GetAll(paginationDTO, queryable);
+        IQueryable<Article> queryable = GetArticleQueryable().AsNoTracking();
+        return await GetAll(articleFilter, queryable);
     }
 
-    public async Task<IEnumerable<Article>> GetAll(PaginationDTO paginationDTO, IQueryable<Article> queryable)
+    public async Task<IEnumerable<Article>> GetAll(ArticleFilter articleFilter, IQueryable<Article> queryable)
     {
+        var paginationDTO = Utilities.GetPaginationDTO(articleFilter);
         await httpContext.HttpContext.InserPaginationParams(queryable, paginationDTO.RecordsByPage);
+
         return await queryable.Paginate(paginationDTO).ToListAsync();
     }
 
     public async Task<IEnumerable<Article>> Search(ArticleFilter articleFilter)
     {
-        var articlesQueryable = _context.Articles.AsQueryable();
+        IQueryable<Article> articleQueryable = GetArticleQueryableFilter(articleFilter).AsNoTracking();
+        return await GetAll(articleFilter, articleQueryable);
+    }
 
-        if (!string.IsNullOrEmpty(articleFilter.Title))
-        {
-            articlesQueryable = articlesQueryable.Where(x => x.Title.Contains(articleFilter.Title));
-        }
+    public async Task<IEnumerable<Article>> GetAllByPersonId(int personId)
+    {
+        IQueryable<Article> articleQueryable = GetArticleQueryable();
 
-        if(articleFilter.Date != null)
-        {
-            articlesQueryable = articlesQueryable.Where(x => x.CreatedAt <= articleFilter.Date);
-        }
-
-        return await articlesQueryable
-            .Include(a => a.Person)
-            .ThenInclude(p => p.User)
-            .Include(a => a.ArticleCategories)
-            .ThenInclude(ac => ac.Category)
+        return await articleQueryable
+            .Where(a => a.PersonId == personId)
+            .OrderByDescending(a => a.CreatedAt)
+            .AsNoTracking()
             .ToListAsync();
     }
 
     public async Task<Article> GetById(int id)
     {
-        return await _context.Articles
-            .Include(a => a.Person)
-            .ThenInclude(p => p.User)
-            .Include(a => a.ArticleCategories)
-            .ThenInclude(ac => ac.Category)
-            .AsNoTracking()
+        return await GetArticleQueryable()
             .FirstOrDefaultAsync(x => x.Id == id);
+    }
+
+    public async Task<Article> GetByIdAndPersonId(int id, int personId)
+    {
+        IQueryable<Article> articleQueryable = GetArticleQueryable();
+
+        return await articleQueryable
+            .FirstOrDefaultAsync(x => x.Id == id && x.PersonId == personId);
     }
 
     public async Task<Article> Save(Article article)
@@ -117,5 +111,35 @@ public class ArticleRepository(ApplicationDbContext context, IHttpContextAccesso
         return await _context.Articles
             .AsNoTracking()
             .AnyAsync(x => x.Id == id && x.PersonId == personId);
+    }
+
+    private IQueryable<Article> GetArticleQueryableFilter(ArticleFilter articleFilter = null)
+    {
+        IQueryable<Article> articlesQueryable = GetArticleQueryable();
+
+        if (articleFilter != null)
+        {
+            if (!string.IsNullOrEmpty(articleFilter.Title))
+            {
+                articlesQueryable = articlesQueryable.Where(x => x.Title.Contains(articleFilter.Title));
+            }
+
+            if (articleFilter.Date != null)
+            {
+                articlesQueryable = articlesQueryable.Where(x => x.CreatedAt <= articleFilter.Date);
+            }
+        }
+
+        return articlesQueryable;
+    }
+
+    private IQueryable<Article> GetArticleQueryable()
+    {
+        return _context.Articles
+            .Include(a => a.Person)
+            .ThenInclude(p => p.User)
+            .Include(a => a.ArticleCategories)
+            .ThenInclude(ac => ac.Category)
+            .AsQueryable();
     }
 }

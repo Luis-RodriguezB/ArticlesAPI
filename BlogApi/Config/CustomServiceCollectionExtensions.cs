@@ -19,6 +19,7 @@ public static class CustomServiceCollectionExtensions
         services.AddScoped<IPersonService, PersonService>();
         services.AddScoped<ICategoryService, CategoryService>();
         services.AddScoped<IArticleCategoryService, ArticleCategoryService>();
+        services.AddScoped<IUserArticleService, UserArticleService>();
 
         return services;
     }

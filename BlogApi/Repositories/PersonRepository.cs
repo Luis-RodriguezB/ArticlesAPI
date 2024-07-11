@@ -20,33 +20,20 @@ public class PersonRepository : IPersonRepository
     }
     public async Task<IEnumerable<Person>> GetAll()
     {
-        return await _context.People
-            .Include(p => p.User)
-            .Include(p => p.Articles)
-            .ThenInclude(a => a.ArticleCategories)
-            .ThenInclude(ac => ac.Category)
+        return await PersonQueryable()
             .AsNoTracking()
             .ToListAsync();
     }
 
     public async Task<Person> GetById(int id)
     {
-        return await _context.People
-            .Include(p => p.User)
-            .Include (p => p.Articles)
-            .ThenInclude(a => a.ArticleCategories)
-            .ThenInclude(ac => ac.Category)
-            .AsNoTracking()
+        return await PersonQueryable()
             .FirstOrDefaultAsync(x => x.Id == id);
     }
 
     public async Task<Person> GetPersonByUserId(string userId)
     {
-        return await _context.People
-            .Include(p => p.User)
-            .Include(p => p.Articles)
-            .ThenInclude(a => a.ArticleCategories)
-            .ThenInclude(ac => ac.Category)
+        return await PersonQueryable()
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.UserId == userId);
     }
@@ -81,5 +68,14 @@ public class PersonRepository : IPersonRepository
     public async Task<bool> Exist(int id)
     {
         return await _context.People.AnyAsync(x => x.Id == id);
+    }
+
+    private IQueryable<Person> PersonQueryable()
+    {
+        return _context.People
+                    .Include(p => p.User)
+                    .Include(p => p.Articles)
+                    .ThenInclude(a => a.ArticleCategories)
+                    .ThenInclude(ac => ac.Category);
     }
 }

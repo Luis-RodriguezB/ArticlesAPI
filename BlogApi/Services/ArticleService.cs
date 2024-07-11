@@ -13,8 +13,9 @@ namespace ArticlesAPI.Services;
 public interface IArticleService
 {
     Task<List<ArticleDTO>> GetAll();
-    Task<List<ArticleDTO>> GetAll(PaginationDTO paginationDTO);
+    Task<List<ArticleDTO>> GetAll(ArticleFilter articleFilter);
     Task<List<ArticleDTO>> Search(ArticleFilter articleFilter);
+    Task<List<ArticleDTO>> GetAllByPersonId(int personId);
     Task<ArticleDTO> GetById(int id);
     Task<ArticleDTO> Save(ArticleCreateDTO entity);
     Task Update(int id, ArticleUpdateDTO entity, string userId);
@@ -45,9 +46,9 @@ public class ArticleService : IArticleService
         return mapper.Map<List<ArticleDTO>>(articles);
     }
 
-    public async Task<List<ArticleDTO>> GetAll(PaginationDTO paginationDTO)
+    public async Task<List<ArticleDTO>> GetAll(ArticleFilter articleFilter)
     {
-        var articles = await articleRepository.GetAll(paginationDTO);
+        var articles = await articleRepository.GetAll(articleFilter);
 
         return mapper.Map<List<ArticleDTO>>(articles);
     }
@@ -55,6 +56,13 @@ public class ArticleService : IArticleService
     public async Task<List<ArticleDTO>> Search(ArticleFilter articleFilter)
     {
         var articles = await articleRepository.Search(articleFilter);
+
+        return mapper.Map<List<ArticleDTO>>(articles);
+    }
+
+    public async Task<List<ArticleDTO>> GetAllByPersonId(int personId)
+    {
+        var articles = await articleRepository.GetAllByPersonId(personId);
 
         return mapper.Map<List<ArticleDTO>>(articles);
     }

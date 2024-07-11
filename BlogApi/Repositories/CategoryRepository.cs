@@ -22,12 +22,14 @@ public class CategoryRepository : ICategoryRepository
 
     public async Task<IEnumerable<Category>> GetAll()
     {
-        return await _context.Categories.AsNoTracking().ToListAsync();
+        return await _context.Categories
+            .AsNoTracking()
+            .ToListAsync();
     }
 
     public async Task<Category> GetById(int id)
     {
-        return await _context.Categories.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+        return await _context.Categories.FirstOrDefaultAsync(x => x.Id == id);
     }
 
     public async Task<Category> Save(Category entity)
@@ -65,11 +67,15 @@ public class CategoryRepository : ICategoryRepository
 
     public async Task<bool> Exist(int id)
     {
-        return await _context.Categories.AsNoTracking().AnyAsync(x => x.Id == id);
+        return await _context.Categories
+            .AsNoTracking()
+            .AnyAsync(x => x.Id == id);
     }
 
     public async Task<bool> ExistCategoryName(string nameNormalized)
     {
-        return await _context.Categories.AsNoTracking().AnyAsync(x => x.NameNormalized.Contains(nameNormalized));
+        return await _context.Categories
+            .AsNoTracking()
+            .AnyAsync(x => x.NameNormalized.Contains(nameNormalized));
     }
 }

@@ -23,9 +23,9 @@ public class ArticlesController : ControllerBase
     }
 
     [HttpGet(Name = "GetArticles")]
-    public async Task<ActionResult<List<ArticleDTO>>> Get([FromQuery] PaginationDTO paginationDTO)
+    public async Task<ActionResult<List<ArticleDTO>>> Get([FromQuery] ArticleFilter articleFilter)
     {
-        return await articleService.GetAll(paginationDTO);
+        return await articleService.GetAll(articleFilter);
     }
 
     [HttpGet("search")]
