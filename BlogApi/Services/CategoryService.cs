@@ -1,4 +1,5 @@
 ﻿using ArticlesAPI.DTOs.Category;
+using ArticlesAPI.DTOs.Filters;
 using ArticlesAPI.Entities;
 using ArticlesAPI.HandleErrors;
 using ArticlesAPI.Repositories;
@@ -8,7 +9,7 @@ namespace ArticlesAPI.Services;
 
 public interface ICategoryService
 {
-    Task<List<CategoryDTO>> GetAll();
+    Task<List<CategoryDTO>> GetAll(CategoryFilter categoryFilter);
     Task<CategoryDTO> GetById(int id);
     Task<CategoryDTO> Save(CategoryCreateDTO entity);
     Task Update(int id, CategoryCreateDTO entity);
@@ -26,9 +27,9 @@ public class CategoryService : ICategoryService
         this.mapper = mapper;
     }
 
-    public async Task<List<CategoryDTO>> GetAll()
+    public async Task<List<CategoryDTO>> GetAll(CategoryFilter categoryFilter)
     {
-        var categories = await categoryRepository.GetAll();
+        var categories = await categoryRepository.GetAll(categoryFilter);
         return mapper.Map<List<CategoryDTO>>(categories);
     }
 

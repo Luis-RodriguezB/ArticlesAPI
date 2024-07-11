@@ -128,7 +128,7 @@ public class ArticleRepository(ApplicationDbContext context, IHttpContextAccesso
                 articlesQueryable = articlesQueryable.Where(x => x.CreatedAt <= articleFilter.Date);
             }
 
-            if (articleFilter.OrderBy != null)
+            if (!string.IsNullOrEmpty(articleFilter.OrderBy))
             {
                 articlesQueryable = articleFilter.OrderBy == "asc" 
                     ? articlesQueryable.OrderBy(x => x.CreatedAt) 

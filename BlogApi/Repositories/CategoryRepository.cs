@@ -1,4 +1,5 @@
-﻿using ArticlesAPI.Entities;
+﻿using ArticlesAPI.DTOs.Filters;
+using ArticlesAPI.Entities;
 using ArticlesAPI.HandleErrors;
 using ArticlesAPI.Interfaces;
 using BlogApi;
@@ -8,6 +9,7 @@ namespace ArticlesAPI.Repositories;
 
 public interface ICategoryRepository : IRepositoryBase<Category>
 {
+    Task<IEnumerable<Category>> GetAll(CategoryFilter categoryFilter);
     Task<bool> ExistCategoryName(string nameNormalized);
 }
 
@@ -23,6 +25,14 @@ public class CategoryRepository : ICategoryRepository
     public async Task<IEnumerable<Category>> GetAll()
     {
         return await _context.Categories
+            .AsNoTracking()
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<Category>> GetAll(CategoryFilter categoryFilter)
+    {
+        IQueryable<Category> categoryQueryable = GetCategortQueryableFilter(categoryFilter);
+        return await categoryQueryable
             .AsNoTracking()
             .ToListAsync();
     }
@@ -76,6 +86,28 @@ public class CategoryRepository : ICategoryRepository
     {
         return await _context.Categories
             .AsNoTracking()
-            .AnyAsync(x => x.NameNormalized.Contains(nameNormalized));
+            .AnyAsync(x => x.NameNormalized.Equals(nameNormalized));
+    }
+
+    private IQueryable<Category> GetCategortQueryableFilter(CategoryFilter categoryFilter)
+    {
+        IQueryable<Category> categoryQueryable = _context.Categories.AsQueryable();
+
+        if (categoryFilter != null)
+        {
+            if (!string.IsNullOrEmpty(categoryFilter.Name))
+            {
+                categoryQueryable = categoryQueryable.Where(x => x.Name.Contains(categoryFilter.Name));
+            }
+
+            if (!string.IsNullOrEmpty(categoryFilter.OrderBy))
+            {
+                categoryQueryable = categoryFilter.OrderBy == "asc"
+                    ? categoryQueryable.OrderBy(x => x.Name)
+                    : categoryQueryable.OrderByDescending(x => x.Name);
+            }
+        }
+
+        return categoryQueryable;
     }
 }

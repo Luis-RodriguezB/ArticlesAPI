@@ -1,4 +1,5 @@
 ﻿using ArticlesAPI.DTOs.Category;
+using ArticlesAPI.DTOs.Filters;
 using ArticlesAPI.HandleErrors;
 using ArticlesAPI.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -19,9 +20,9 @@ public class CategoryController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<CategoryDTO>>> Get()
+    public async Task<ActionResult<List<CategoryDTO>>> Get([FromQuery] CategoryFilter categoryFilter)
     {
-        return await categoryService.GetAll();
+        return await categoryService.GetAll(categoryFilter);
     }
 
     [HttpGet("{id:int}", Name = "GetCategory")]
