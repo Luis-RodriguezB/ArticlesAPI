@@ -1,4 +1,5 @@
-﻿using ArticlesAPI.DTOs.Person;
+﻿using ArticlesAPI.DTOs.Filters;
+using ArticlesAPI.DTOs.Person;
 using ArticlesAPI.HandleErrors;
 using ArticlesAPI.Repositories;
 using AutoMapper;
@@ -7,7 +8,7 @@ namespace ArticlesAPI.Services;
 
 public interface IPersonService
 {
-    Task<List<PersonDTO>> GetAll();
+    Task<List<PersonDTO>> GetAll(PersonFilter personFilter);
     Task<PersonDTO> GetById(int id);
     Task Update(int id, PersonUpdateDTO entity, string userId);
 }
@@ -22,9 +23,9 @@ public class PersonService : IPersonService
         this.mapper = mapper;
     }
 
-    public async Task<List<PersonDTO>> GetAll()
+    public async Task<List<PersonDTO>> GetAll(PersonFilter personFilter)
     {
-        var users = await personRepository.GetAll();
+        var users = await personRepository.GetAll(personFilter);
 
         return mapper.Map<List<PersonDTO>>(users);
     }

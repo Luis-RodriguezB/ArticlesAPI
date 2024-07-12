@@ -1,4 +1,5 @@
-﻿using ArticlesAPI.DTOs.Person;
+﻿using ArticlesAPI.DTOs.Filters;
+using ArticlesAPI.DTOs.Person;
 using ArticlesAPI.HandleErrors;
 using ArticlesAPI.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -17,6 +18,12 @@ public class PeopleController : ControllerBase
     public PeopleController(IPersonService personService)
     {
         this.personService = personService;
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<List<PersonDTO>>> Get([FromQuery] PersonFilter personFilter)
+    {
+        return await personService.GetAll(personFilter);
     }
 
     [HttpGet("{id:int}")]
