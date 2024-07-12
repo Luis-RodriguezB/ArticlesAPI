@@ -1,5 +1,5 @@
 ﻿namespace ArticlesAPI.Interfaces;
-public interface IRepositoryBase<TEntity>
+public interface IRepositoryBase<TEntity> : IDisposable
 {
     Task<IEnumerable<TEntity>> GetAll();
     Task<TEntity> GetById(int id);

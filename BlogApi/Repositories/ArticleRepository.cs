@@ -18,10 +18,16 @@ public interface IArticleRepository : IRepositoryBase<Article>
     Task<bool> IsArticleBelongPerson(int id, int personId);
 }
 
-public class ArticleRepository(ApplicationDbContext context, IHttpContextAccessor httpContext) : IArticleRepository
+public class ArticleRepository : IArticleRepository
 {
-    private readonly ApplicationDbContext _context = context;
-    private readonly IHttpContextAccessor httpContext = httpContext;
+    private readonly ApplicationDbContext _context;
+    private readonly IHttpContextAccessor httpContext;
+
+    public ArticleRepository(ApplicationDbContext context, IHttpContextAccessor httpContext)
+    {
+        this._context = context;
+        this.httpContext = httpContext;
+    }
 
     public async Task<IEnumerable<Article>> GetAll()
     {
@@ -150,5 +156,19 @@ public class ArticleRepository(ApplicationDbContext context, IHttpContextAccesso
             .Include(a => a.ArticleCategories)
             .ThenInclude(ac => ac.Category)
             .AsQueryable();
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            _context.Dispose();
+        }
+    }
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
     }
 }

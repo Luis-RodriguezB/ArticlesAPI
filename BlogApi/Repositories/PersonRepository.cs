@@ -138,4 +138,18 @@ public class PersonRepository : IPersonRepository
             .ThenInclude(a => a.ArticleCategories)
             .ThenInclude(ac => ac.Category);
     }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            _context.Dispose();
+        }
+    }
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
 }
