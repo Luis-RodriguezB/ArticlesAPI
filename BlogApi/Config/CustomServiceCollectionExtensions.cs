@@ -1,5 +1,7 @@
 ﻿using ArticlesAPI.Repositories;
+using ArticlesAPI.Repositories.Interfaces;
 using ArticlesAPI.Services;
+using ArticlesAPI.Services.Interfaces;
 using BlogApi.Repositories;
 
 namespace ArticlesAPI.Config;

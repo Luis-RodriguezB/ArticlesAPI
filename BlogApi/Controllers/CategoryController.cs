@@ -1,7 +1,7 @@
 ﻿using ArticlesAPI.DTOs.Category;
 using ArticlesAPI.DTOs.Filters;
 using ArticlesAPI.HandleErrors;
-using ArticlesAPI.Services;
+using ArticlesAPI.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

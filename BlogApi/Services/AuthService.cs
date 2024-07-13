@@ -1,7 +1,8 @@
 ﻿using ArticlesAPI.DTOs.Auth;
 using ArticlesAPI.DTOs.Others;
 using ArticlesAPI.HandleErrors;
-using ArticlesAPI.Repositories;
+using ArticlesAPI.Repositories.Interfaces;
+using ArticlesAPI.Services.Interfaces;
 using AutoMapper;
 using BlogApi;
 using BlogApi.DTOs.Auth;
@@ -14,17 +15,6 @@ using System.Security.Claims;
 using System.Text;
 
 namespace ArticlesAPI.Services;
-
-public interface IAuthService
-{
-    Task<AuthResponseDTO> Register(RegisterDTO registerDTO);
-    Task<AuthResponseDTO> Login(LoginDTO loginDTO);
-    Task<AuthResponseDTO> RenewToken(string email);
-    Task<ResponseDTO> ToggleAdmin(string email);
-    Task<List<UserDTO>> Get();
-    Task<UserDTO> GetById(string id);
-    Task<ResponseDTO> Delete(string id);
-}
 
 public class AuthService : IAuthService
 {

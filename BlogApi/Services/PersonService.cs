@@ -1,17 +1,12 @@
 ﻿using ArticlesAPI.DTOs.Filters;
 using ArticlesAPI.DTOs.Person;
 using ArticlesAPI.HandleErrors;
-using ArticlesAPI.Repositories;
+using ArticlesAPI.Repositories.Interfaces;
+using ArticlesAPI.Services.Interfaces;
 using AutoMapper;
 
 namespace ArticlesAPI.Services;
 
-public interface IPersonService
-{
-    Task<List<PersonDTO>> GetAll(PersonFilter personFilter);
-    Task<PersonDTO> GetById(int id);
-    Task Update(int id, PersonUpdateDTO entity, string userId);
-}
 public class PersonService : IPersonService
 {
     private readonly IPersonRepository personRepository;

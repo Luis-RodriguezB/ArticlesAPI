@@ -1,15 +1,11 @@
 ﻿using ArticlesAPI.DTOs.Category;
 using ArticlesAPI.Entities;
 using ArticlesAPI.HandleErrors;
-using ArticlesAPI.Repositories;
+using ArticlesAPI.Repositories.Interfaces;
+using ArticlesAPI.Services.Interfaces;
 
 namespace ArticlesAPI.Services;
 
-public interface IArticleCategoryService
-{
-    Task ValidateAndCreateArticleCategories(List<CategoryArticleDTO> categoryDTOs, int articleId);
-    Task ValidateAndUpdateArticleCategories(IEnumerable<int> categoriesIdDb, IEnumerable<int> categoriesIdToUpdate, int articleId);
-}
 public class ArticleCategoryService : IArticleCategoryService
 {
     private readonly IArticleCategoryRepository articleCategoryRepository;

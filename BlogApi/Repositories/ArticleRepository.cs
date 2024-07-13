@@ -1,22 +1,11 @@
 ﻿using ArticlesAPI.DTOs.Filters;
-using ArticlesAPI.DTOs.Others;
 using ArticlesAPI.Helpers;
-using ArticlesAPI.Interfaces;
+using ArticlesAPI.Repositories.Interfaces;
 using ArticlesAPI.Utils;
 using BlogApi.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace BlogApi.Repositories;
-
-public interface IArticleRepository : IRepositoryBase<Article>
-{
-    Task<IEnumerable<Article>> GetAll(ArticleFilter articleFilter);
-    Task<IEnumerable<Article>> GetAll(ArticleFilter articleFilter, IQueryable<Article> queryable);
-    Task<IEnumerable<Article>> Search(ArticleFilter articleFilter);
-    Task<IEnumerable<Article>> GetAllByPersonId(int personId, ArticleFilter articleFilter);
-    Task<Article> GetByIdAndPersonId(int id, int personId);   
-    Task<bool> IsArticleBelongPerson(int id, int personId);
-}
 
 public class ArticleRepository : IArticleRepository
 {

@@ -1,8 +1,7 @@
 ﻿using ArticlesAPI.DTOs.Article;
 using ArticlesAPI.DTOs.Filters;
-using ArticlesAPI.DTOs.Others;
 using ArticlesAPI.HandleErrors;
-using ArticlesAPI.Services;
+using ArticlesAPI.Services.Interfaces;
 using BlogApi.DTOs.Blog;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;

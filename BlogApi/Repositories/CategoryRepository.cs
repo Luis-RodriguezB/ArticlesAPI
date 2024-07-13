@@ -1,17 +1,11 @@
 ﻿using ArticlesAPI.DTOs.Filters;
 using ArticlesAPI.Entities;
 using ArticlesAPI.HandleErrors;
-using ArticlesAPI.Interfaces;
+using ArticlesAPI.Repositories.Interfaces;
 using BlogApi;
 using Microsoft.EntityFrameworkCore;
 
 namespace ArticlesAPI.Repositories;
-
-public interface ICategoryRepository : IRepositoryBase<Category>
-{
-    Task<IEnumerable<Category>> GetAll(CategoryFilter categoryFilter);
-    Task<bool> ExistCategoryName(string nameNormalized);
-}
 
 public class CategoryRepository : ICategoryRepository
 {

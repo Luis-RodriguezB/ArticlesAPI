@@ -1,19 +1,15 @@
 ﻿using ArticlesAPI.DTOs.Filters;
 using ArticlesAPI.HandleErrors;
-using ArticlesAPI.Repositories;
+using ArticlesAPI.Repositories.Interfaces;
+using ArticlesAPI.Services.Interfaces;
 using AutoMapper;
 using BlogApi.DTOs.Blog;
-using BlogApi.Repositories;
 
 namespace ArticlesAPI.Services;
 
-public interface IUserArticleService
-{
-    Task<List<ArticleDTO>> GetArticlesByPersonId(int personId, ArticleFilter articleFilter);
-    Task<ArticleDTO> GetArticleByPersonId(int id, int personId);
-}
 public class UserArticleService : IUserArticleService
 {
+
     private readonly IArticleRepository articleRepository;
     private readonly IPersonRepository personRepository;
     private readonly IMapper mapper;

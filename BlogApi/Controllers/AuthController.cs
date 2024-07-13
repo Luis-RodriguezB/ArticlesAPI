@@ -1,6 +1,6 @@
 ﻿using ArticlesAPI.DTOs.Auth;
 using ArticlesAPI.HandleErrors;
-using ArticlesAPI.Services;
+using ArticlesAPI.Services.Interfaces;
 using BlogApi.DTOs.Auth;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;

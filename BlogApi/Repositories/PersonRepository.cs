@@ -1,20 +1,13 @@
 ﻿using ArticlesAPI.DTOs.Filters;
 using ArticlesAPI.DTOs.Others;
 using ArticlesAPI.Helpers;
-using ArticlesAPI.Interfaces;
+using ArticlesAPI.Repositories.Interfaces;
 using ArticlesAPI.Utils;
 using BlogApi;
 using BlogApi.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace ArticlesAPI.Repositories;
-
-public interface IPersonRepository : IRepositoryBase<Person>
-{
-    Task<IEnumerable<Person>> GetAll(PersonFilter personFilter);
-    Task<IEnumerable<Person>> GetAll(PersonFilter personFilter, IQueryable<Person> queryable);
-    Task<Person> GetPersonByUserId(string userId);
-}
 
 public class PersonRepository : IPersonRepository
 {

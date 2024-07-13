@@ -2,19 +2,11 @@
 using ArticlesAPI.DTOs.Filters;
 using ArticlesAPI.Entities;
 using ArticlesAPI.HandleErrors;
-using ArticlesAPI.Repositories;
+using ArticlesAPI.Repositories.Interfaces;
+using ArticlesAPI.Services.Interfaces;
 using AutoMapper;
 
 namespace ArticlesAPI.Services;
-
-public interface ICategoryService
-{
-    Task<List<CategoryDTO>> GetAll(CategoryFilter categoryFilter);
-    Task<CategoryDTO> GetById(int id);
-    Task<CategoryDTO> Save(CategoryCreateDTO entity);
-    Task Update(int id, CategoryCreateDTO entity);
-    Task Delete(int id);
-}
 
 public class CategoryService : ICategoryService
 {

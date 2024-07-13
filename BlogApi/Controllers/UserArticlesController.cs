@@ -1,6 +1,6 @@
 ﻿using ArticlesAPI.DTOs.Filters;
 using ArticlesAPI.HandleErrors;
-using ArticlesAPI.Services;
+using ArticlesAPI.Services.Interfaces;
 using BlogApi.DTOs.Blog;
 using Microsoft.AspNetCore.Mvc;
 
