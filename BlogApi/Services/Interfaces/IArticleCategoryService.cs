@@ -3,6 +3,6 @@
 namespace ArticlesAPI.Services.Interfaces;
 public interface IArticleCategoryService
 {
-    Task ValidateAndCreateArticleCategories(List<CategoryArticleDTO> categoryDTOs, int articleId);
-    Task ValidateAndUpdateArticleCategories(IEnumerable<int> categoriesIdDb, IEnumerable<int> categoriesIdToUpdate, int articleId);
+    Task ValidateAndCreate(List<CategoryArticleDTO> categoryDTOs, int articleId);
+    Task ValidateAndUpdate(IEnumerable<CategoryArticleDTO> categoryArticleDTOs, int articleId);
 }

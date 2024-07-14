@@ -4,11 +4,9 @@ using ArticlesAPI.HandleErrors;
 using ArticlesAPI.Repositories.Interfaces;
 using ArticlesAPI.Services.Interfaces;
 using AutoMapper;
-using BlogApi;
 using BlogApi.DTOs.Auth;
 using BlogApi.Models;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -18,26 +16,26 @@ namespace ArticlesAPI.Services;
 
 public class AuthService : IAuthService
 {
+    private readonly IUserRepository userRepository;
     private readonly UserManager<User> userManager;
     private readonly SignInManager<User> signInManager;
     private readonly IPersonRepository personRepository;
     private readonly IConfiguration configuration;
-    private readonly ApplicationDbContext context;
     private readonly IMapper mapper;
 
     public AuthService(
+        IUserRepository userRepository,
         UserManager<User> userManager,
         SignInManager<User> signInManager,
         IPersonRepository personRepository,
         IConfiguration configuration,
-        ApplicationDbContext context,
         IMapper mapper)
     {
+        this.userRepository = userRepository;
         this.userManager = userManager;
         this.signInManager = signInManager;
         this.personRepository = personRepository;
         this.configuration = configuration;
-        this.context = context;
         this.mapper = mapper;
     }
 
@@ -61,15 +59,14 @@ public class AuthService : IAuthService
 
     public async Task<AuthResponseDTO> Login(LoginDTO loginDTO)
     {
-        var user = await userManager.FindByEmailAsync(loginDTO.Email);
-
-        if (user == null)
-        {
-            throw new NotFoundException($"Not exist a user with this email { loginDTO.Email }");
-        }
+        var user = await GetUserByEmail(loginDTO.Email);
 
         var result = await signInManager.PasswordSignInAsync(
-            user.UserName, loginDTO.Password, isPersistent: false, lockoutOnFailure: false);
+            user.UserName,
+            loginDTO.Password,
+            isPersistent: false,
+            lockoutOnFailure: false
+        );
 
         if (result.Succeeded)
         {
@@ -81,33 +78,19 @@ public class AuthService : IAuthService
 
     public async Task<AuthResponseDTO> RenewToken(string email)
     {
-        var user = await userManager.FindByEmailAsync(email);
+        var user = await GetUserByEmail(email);
 
-        return user == null 
-            ? throw new NotFoundException($"Not exist a user with this email {email}") 
-            : await GenerateToken(user);
+        return await GenerateToken(user);
     }
 
     public async Task<ResponseDTO> ToggleAdmin(string email)
     {
-        var user = await userManager.FindByEmailAsync(email);
-
-        if (user == null)
-        {
-            throw new NotFoundException($"Not exist a user with this email {email}");
-        }
-
+        User user = await GetUserByEmail(email);
         var isAdmin = await userManager.IsInRoleAsync(user, "Admin");
-        IdentityResult result;
 
-        if (isAdmin)
-        {
-            result = await userManager.RemoveFromRoleAsync(user, "Admin");
-        }
-        else
-        {
-            result = await userManager.AddToRoleAsync(user, "Admin");
-        }
+        IdentityResult result = isAdmin
+                ? await userManager.RemoveFromRoleAsync(user, "Admin")
+                : await userManager.AddToRoleAsync(user, "Admin");
 
         if (result.Succeeded)
         {
@@ -118,38 +101,28 @@ public class AuthService : IAuthService
         throw new BadRequestException(result.Errors.ElementAt(0).Description);
     }
 
+    private async Task<User> GetUserByEmail(string email)
+    {
+        return await userManager.FindByEmailAsync(email)
+            ?? throw new NotFoundException($"Not exist a user with this email {email}");
+    }
+
     public async Task<List<UserDTO>> Get()
     {
-        var users = await context.Users
-            .Include(u => u.Person)
-            .ThenInclude(u => u.Articles)
-            .Where(u => !u.Email.Contains("admin@admin.com"))
-            .AsNoTracking()
-            .ToListAsync();
-
+        var users = await userRepository.GetAll();
         return mapper.Map<List<UserDTO>>(users);
     }
 
     public async Task<UserDTO> GetById(string id)
     {
-        var user = await context.Users
-            .Include(u => u.Person)
-            .ThenInclude(u => u.Articles)
-            .Where(u => !u.Email.Contains("admin@admin.com"))
-            .AsNoTracking()
-            .FirstOrDefaultAsync(u => u.Id == id);
-
+        var user = await userRepository.GetById(id);
         return mapper.Map<UserDTO>(user);
     }
 
     public async Task<ResponseDTO> Delete(string id)
     {
-        var user = await userManager.FindByIdAsync(id);
-
-        if (user == null)
-        {
-            throw new NotFoundException($"Not exist a user with the id {id}");
-        }
+        var user = await userManager.FindByIdAsync(id) 
+            ?? throw new NotFoundException($"Not exist a user with the id {id}");
 
         var result = await userManager.DeleteAsync(user);
         if (result.Succeeded)

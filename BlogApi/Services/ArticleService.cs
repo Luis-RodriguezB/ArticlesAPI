@@ -65,8 +65,7 @@ public class ArticleService : IArticleService
             {
                 var article = mapper.Map<Article>(entity);
                 await articleRepository.Save(article);
-
-                await articleCategoryService.ValidateAndCreateArticleCategories(entity.Categories, article.Id);
+                await articleCategoryService.ValidateAndCreate(entity.Categories, article.Id);
 
                 await transaction.CommitAsync();
                 return await GetById(article.Id);
@@ -100,11 +99,7 @@ public class ArticleService : IArticleService
             {
                 articleDb = mapper.Map(entity, articleDb);
                 await articleRepository.Update(articleDb);
-
-                var categoriesIdDb = articleDb.ArticleCategories.Select(x => x.CategoryId).ToList();
-                var categoriesToUpdate = entity.Categories.Select(x => x.Id).ToList();
-
-                await articleCategoryService.ValidateAndUpdateArticleCategories(categoriesIdDb, categoriesToUpdate, articleDb.Id);
+                await articleCategoryService.ValidateAndUpdate(entity.Categories, articleDb.Id);
 
                 await transaction.CommitAsync();
             } catch (NotFoundException)

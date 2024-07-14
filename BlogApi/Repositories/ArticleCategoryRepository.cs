@@ -20,25 +20,18 @@ public class ArticleCategoryRepository : IDisposable, IArticleCategoryRepository
         return await _context.ArticleCategories.ToListAsync();
     }
 
+    public async Task<IEnumerable<ArticleCategory>> GetAllByArticleId(int articleId)
+    {
+        return await _context.ArticleCategories
+            .Where(x => x.ArticleId == articleId)
+            .ToListAsync();
+    }
+
     public async Task<ArticleCategory> GetByIds(int articleId, int categoryId)
     {
         return await _context.ArticleCategories
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.ArticleId == articleId && x.CategoryId == categoryId);
-    }
-
-    public async Task<ArticleCategory> GetByArticleId(int articleId)
-    {
-        return await _context.ArticleCategories
-            .AsNoTracking()
-            .FirstOrDefaultAsync(x => x.ArticleId == articleId);
-    }
-
-    public async Task<ArticleCategory> GetByCategoryId(int categoryId)
-    {
-        return await _context.ArticleCategories
-            .AsNoTracking()
-            .FirstOrDefaultAsync(x => x.CategoryId == categoryId);
     }
 
     public async Task<ArticleCategory> Save(ArticleCategory entity)

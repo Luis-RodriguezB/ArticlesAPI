@@ -27,11 +27,38 @@ public class AutoMapperProfiles : Profile
             .ForMember(p => p.Articles, options => options.MapFrom(MapArticlesPerson));
         CreateMap<Person, PersonUserDTO>();
         CreateMap<User, UserDTO>()
-            .ForMember(u => u.Person, opt => opt.MapFrom(sr => sr.Person));
+            .ForMember(u => u.Person, opt => opt.MapFrom(MapUserPerson));
 
         CreateMap<Category, CategoryDTO>();
         CreateMap<CategoryCreateDTO, Category>();
         CreateMap<Category, CategoryArticleDTO>();
+    }
+
+    private PersonUserDTO MapUserPerson(User user, UserDTO userDTO)
+    {
+        PersonUserDTO personUpdateDTO = new()
+        {
+            Id = user.Person.Id,
+            FirstName = user.Person.FirstName,
+            LastName = user.Person.LastName,
+            AboutMe = user.Person.AboutMe,
+            Articles = user.Person.Articles.Select(x => new ArticlePersonDTO
+            {
+                Id = x.Id,
+                Title = x.Title,
+                Content = x.Content,
+                CreatedAt = x.CreatedAt,
+                UpdatedAt = x.UpdatedAt,
+                Categories = x.ArticleCategories.Select(x => new CategoryDTO
+                {
+                    Id = x.CategoryId,
+                    Name = x.Category.Name
+                }).ToList()
+            }).ToList()
+        };
+
+
+        return personUpdateDTO;
     }
 
     private List<CategoryDTO> MapCategoriesArticle(Article article, ArticleDTO articleDTO)

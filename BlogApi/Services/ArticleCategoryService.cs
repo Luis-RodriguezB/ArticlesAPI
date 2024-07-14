@@ -3,6 +3,7 @@ using ArticlesAPI.Entities;
 using ArticlesAPI.HandleErrors;
 using ArticlesAPI.Repositories.Interfaces;
 using ArticlesAPI.Services.Interfaces;
+using BlogApi.Models;
 
 namespace ArticlesAPI.Services;
 
@@ -18,7 +19,7 @@ public class ArticleCategoryService : IArticleCategoryService
         this.categoryRepository = categoryRepository;
     }
 
-    public async Task ValidateAndCreateArticleCategories(List<CategoryArticleDTO> categoryDTOs, int articleId)
+    public async Task ValidateAndCreate(List<CategoryArticleDTO> categoryDTOs, int articleId)
     {
         foreach (var category in categoryDTOs)
         {
@@ -36,12 +37,29 @@ public class ArticleCategoryService : IArticleCategoryService
         }
     }
 
-    public async Task ValidateAndUpdateArticleCategories(IEnumerable<int> categoriesIdDb, IEnumerable<int> categoriesIdToUpdate, int articleId)
+    public async Task ValidateAndUpdate(IEnumerable<CategoryArticleDTO> categoryArticleDTOs, int articleId)
     {
-        var categoriesToAdd = categoriesIdToUpdate.Except(categoriesIdDb).ToList();
-        var categoriesToRemove = categoriesIdDb.Except(categoriesIdToUpdate).ToList();
+        var articleCategories = await articleCategoryRepository.GetAllByArticleId(articleId);
 
-        // Remove relations
+        IEnumerable<int> categoriesIdsDb = articleCategories.Select(x => x.CategoryId).ToList();
+        IEnumerable<int> categoriesIdsUpdate = categoryArticleDTOs.Select(x => x.Id).ToList();
+
+        GetIdsToAddAndDelete(
+            categoriesIdsDb,
+            categoriesIdsUpdate,
+            out IEnumerable<int> categoriesToAdd,
+            out IEnumerable<int> categoriesToRemove
+        );
+
+        // RemoveCategories relations
+        await RemoveCategories(articleId, categoriesToRemove);
+
+        // Add relations
+        await AddCategories(articleId, categoriesToAdd);
+    }
+
+    private async Task RemoveCategories(int articleId, IEnumerable<int> categoriesToRemove)
+    {
         foreach (var categoryId in categoriesToRemove)
         {
             var articleCategory = await articleCategoryRepository.GetByIds(articleId, categoryId);
@@ -51,8 +69,10 @@ public class ArticleCategoryService : IArticleCategoryService
                 await articleCategoryRepository.Delete(articleCategory);
             }
         }
+    }
 
-        // Add relations
+    private async Task AddCategories(int articleId, IEnumerable<int> categoriesToAdd)
+    {
         foreach (var categoryId in categoriesToAdd)
         {
             if (!await categoryRepository.Exist(categoryId))
@@ -68,5 +88,15 @@ public class ArticleCategoryService : IArticleCategoryService
 
             await articleCategoryRepository.Save(articleCategory);
         }
+    }
+
+    private static void GetIdsToAddAndDelete(
+        IEnumerable<int> categoriesIdsDb,
+        IEnumerable<int> categoriesIdsUpdate,
+        out IEnumerable<int> categoriesToAdd,
+        out IEnumerable<int> categoriesToRemove)
+    {
+        categoriesToAdd = categoriesIdsUpdate.Except(categoriesIdsDb).ToList();
+        categoriesToRemove = categoriesIdsDb.Except(categoriesIdsUpdate).ToList();
     }
 }

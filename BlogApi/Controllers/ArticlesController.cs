@@ -52,6 +52,7 @@ public class ArticlesController : ControllerBase
     {
         try
         {
+            var userID = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var article = await articleService.Save(articleCreateDTO);
             return CreatedAtRoute("GetArticle", new { article.Id }, article);
         }
@@ -71,7 +72,7 @@ public class ArticlesController : ControllerBase
     {
         try
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             await articleService.Update(id, articleUpdateDTO, userId);
 
             return NoContent();
