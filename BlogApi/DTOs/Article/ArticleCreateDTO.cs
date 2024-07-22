@@ -10,5 +10,5 @@ public class ArticleCreateDTO
     public string Content { get; set; }
     [Required]
     public int PersonId { get; set; }
-    public List<CategoryArticleDTO> Categories { get; set; }
+    public ICollection<CategoryArticleDTO> Categories { get; set; } = [];
 }

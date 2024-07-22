@@ -10,12 +10,10 @@ namespace BlogApi.Repositories;
 public class ArticleRepository : IArticleRepository
 {
     private readonly ApplicationDbContext _context;
-    private readonly IHttpContextAccessor httpContext;
 
-    public ArticleRepository(ApplicationDbContext context, IHttpContextAccessor httpContext)
+    public ArticleRepository(ApplicationDbContext context)
     {
         this._context = context;
-        this.httpContext = httpContext;
     }
 
     public async Task<IEnumerable<Article>> GetAll()
@@ -34,8 +32,6 @@ public class ArticleRepository : IArticleRepository
     public async Task<IEnumerable<Article>> GetAll(ArticleFilter articleFilter, IQueryable<Article> queryable)
     {
         var paginationDTO = Utilities.GetPaginationDTO(articleFilter);
-        await httpContext.HttpContext.InserPaginationParams(queryable, paginationDTO.RecordsByPage);
-
         return await queryable.Paginate(paginationDTO).ToListAsync();
     }
 
@@ -58,6 +54,10 @@ public class ArticleRepository : IArticleRepository
     public async Task<Article> GetById(int id)
     {  
         return await GetArticleQueryable()
+            .Include(a => a.Person)
+            .ThenInclude(p => p.User)
+            .Include(a => a.ArticleCategories)
+            .Include(a => a.Ratings)
             .FirstOrDefaultAsync(x => x.Id == id);
     }
 
@@ -140,10 +140,6 @@ public class ArticleRepository : IArticleRepository
     private IQueryable<Article> GetArticleQueryable()
     {
         return _context.Articles
-            .Include(a => a.Person)
-            .ThenInclude(p => p.User)
-            .Include(a => a.ArticleCategories)
-            .ThenInclude(ac => ac.Category)
             .AsQueryable();
     }
 

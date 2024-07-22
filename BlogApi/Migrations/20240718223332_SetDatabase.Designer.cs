@@ -9,21 +9,78 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace BlogApi.Migrations
+namespace ArticlesAPI.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240706212016_RefactorsTableNames")]
-    partial class RefactorsTableNames
+    [Migration("20240718223332_SetDatabase")]
+    partial class SetDatabase
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.6")
+                .HasAnnotation("ProductVersion", "8.0.7")
+                .HasAnnotation("Proxies:ChangeTracking", false)
+                .HasAnnotation("Proxies:CheckEquality", false)
+                .HasAnnotation("Proxies:LazyLoading", true)
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("ArticlesAPI.Entities.ArticleCategory", b =>
+                {
+                    b.Property<int>("ArticleId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ArticleId", "CategoryId");
+
+                    b.HasIndex("CategoryId");
+
+                    b.ToTable("ArticleCategories");
+                });
+
+            modelBuilder.Entity("ArticlesAPI.Entities.Category", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.Property<string>("NameNormalized")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Categories");
+                });
+
+            modelBuilder.Entity("ArticlesAPI.Entities.Rating", b =>
+                {
+                    b.Property<int>("ArticleId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PersonId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("Like")
+                        .HasColumnType("bit");
+
+                    b.HasKey("ArticleId", "PersonId");
+
+                    b.HasIndex("PersonId");
+
+                    b.ToTable("Ratings");
+                });
 
             modelBuilder.Entity("BlogApi.Models.Article", b =>
                 {
@@ -45,7 +102,8 @@ namespace BlogApi.Migrations
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -68,13 +126,21 @@ namespace BlogApi.Migrations
                     b.Property<string>("AboutMe")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("FirstName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
 
                     b.Property<string>("LastName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
@@ -286,6 +352,44 @@ namespace BlogApi.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("ArticlesAPI.Entities.ArticleCategory", b =>
+                {
+                    b.HasOne("BlogApi.Models.Article", "Article")
+                        .WithMany("ArticleCategories")
+                        .HasForeignKey("ArticleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ArticlesAPI.Entities.Category", "Category")
+                        .WithMany("ArticleCategories")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Article");
+
+                    b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("ArticlesAPI.Entities.Rating", b =>
+                {
+                    b.HasOne("BlogApi.Models.Article", "Article")
+                        .WithMany("Ratings")
+                        .HasForeignKey("ArticleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BlogApi.Models.Person", "Person")
+                        .WithMany("Ratings")
+                        .HasForeignKey("PersonId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Article");
+
+                    b.Navigation("Person");
+                });
+
             modelBuilder.Entity("BlogApi.Models.Article", b =>
                 {
                     b.HasOne("BlogApi.Models.Person", "Person")
@@ -301,7 +405,8 @@ namespace BlogApi.Migrations
                 {
                     b.HasOne("BlogApi.Models.User", "User")
                         .WithOne("Person")
-                        .HasForeignKey("BlogApi.Models.Person", "UserId");
+                        .HasForeignKey("BlogApi.Models.Person", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("User");
                 });
@@ -357,9 +462,23 @@ namespace BlogApi.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("ArticlesAPI.Entities.Category", b =>
+                {
+                    b.Navigation("ArticleCategories");
+                });
+
+            modelBuilder.Entity("BlogApi.Models.Article", b =>
+                {
+                    b.Navigation("ArticleCategories");
+
+                    b.Navigation("Ratings");
+                });
+
             modelBuilder.Entity("BlogApi.Models.Person", b =>
                 {
                     b.Navigation("Articles");
+
+                    b.Navigation("Ratings");
                 });
 
             modelBuilder.Entity("BlogApi.Models.User", b =>

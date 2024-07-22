@@ -59,27 +59,25 @@ public class ArticleService : IArticleService
 
     public async Task<ArticleDTO> Save(ArticleCreateDTO entity)
     {
-        using (var transaction = await context.Database.BeginTransactionAsync())
+        using var transaction = await context.Database.BeginTransactionAsync();
+        try
         {
-            try
-            {
-                var article = mapper.Map<Article>(entity);
-                await articleRepository.Save(article);
-                await articleCategoryService.ValidateAndCreate(entity.Categories, article.Id);
+            var article = mapper.Map<Article>(entity);
+            await articleRepository.Save(article);
+            await articleCategoryService.ValidateAndCreate(entity.Categories.ToList(), article.Id);
 
-                await transaction.CommitAsync();
-                return await GetById(article.Id);
-            }
-            catch (NotFoundException)
-            {
-                await transaction.RollbackAsync();
-                throw;
-            }
-            catch (Exception ex)
-            {
-                await transaction.RollbackAsync();
-                throw new BadRequestException("An error occurred while creating the article. " + ex.Message);
-            }
+            await transaction.CommitAsync();
+            return await GetById(article.Id);
+        }
+        catch (NotFoundException)
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            throw new BadRequestException("An error occurred while creating the article. " + ex.Message);
         }
     }
 
@@ -93,24 +91,24 @@ public class ArticleService : IArticleService
             throw new ForbiddenException($"The article with the id {id} doesn´t belong to the user with the id {userId}");
         }
 
-        using (var transaction = await context.Database.BeginTransactionAsync())
+        using var transaction = await context.Database.BeginTransactionAsync();
+        try
         {
-            try
-            {
-                articleDb = mapper.Map(entity, articleDb);
-                await articleRepository.Update(articleDb);
-                await articleCategoryService.ValidateAndUpdate(entity.Categories, articleDb.Id);
+            articleDb = mapper.Map(entity, articleDb);
+            await articleRepository.Update(articleDb);
+            await articleCategoryService.ValidateAndUpdate(entity.Categories, articleDb.Id);
 
-                await transaction.CommitAsync();
-            } catch (NotFoundException)
-            {
-                await transaction.RollbackAsync();
-                throw;
-            } catch (Exception ex)
-            {
-                await transaction.RollbackAsync();
-                throw new BadRequestException("An error occurred while updating the article. " + ex.Message);
-            }
+            await transaction.CommitAsync();
+        }
+        catch (NotFoundException)
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            throw new BadRequestException("An error occurred while updating the article. " + ex.Message);
         }
     }
 

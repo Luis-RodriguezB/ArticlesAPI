@@ -1,4 +1,5 @@
 ﻿using ArticlesAPI.DTOs.Auth;
+using ArticlesAPI.DTOs.Filters;
 using ArticlesAPI.DTOs.Others;
 using ArticlesAPI.HandleErrors;
 using ArticlesAPI.Repositories.Interfaces;
@@ -107,9 +108,9 @@ public class AuthService : IAuthService
             ?? throw new NotFoundException($"Not exist a user with this email {email}");
     }
 
-    public async Task<List<UserDTO>> Get()
+    public async Task<List<UserDTO>> Get(UserFilter userFilter)
     {
-        var users = await userRepository.GetAll();
+        var users = await userRepository.GetAll(userFilter);
         return mapper.Map<List<UserDTO>>(users);
     }
 

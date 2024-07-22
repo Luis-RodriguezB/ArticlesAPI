@@ -2,6 +2,7 @@
 using ArticlesAPI.DTOs.Auth;
 using ArticlesAPI.DTOs.Category;
 using ArticlesAPI.DTOs.Person;
+using ArticlesAPI.DTOs.Rating;
 using ArticlesAPI.Entities;
 using AutoMapper;
 using BlogApi.DTOs.Auth;
@@ -16,7 +17,8 @@ public class AutoMapperProfiles : Profile
     {
         CreateMap<Article, ArticleDTO>()
             .ForMember(a => a.Person, options => options.MapFrom(MapPersonArticle))
-            .ForMember(a => a.Categories, options => options.MapFrom(MapCategoriesArticle));
+            .ForMember(a => a.Categories, options => options.MapFrom(MapCategoriesArticle))
+            .ForMember(a => a.Rating, options => options.MapFrom(MapRatingArticle));
         CreateMap<ArticleCreateDTO, Article>();
         CreateMap<ArticleUpdateDTO, Article>();
 
@@ -32,6 +34,8 @@ public class AutoMapperProfiles : Profile
         CreateMap<Category, CategoryDTO>();
         CreateMap<CategoryCreateDTO, Category>();
         CreateMap<Category, CategoryArticleDTO>();
+
+        CreateMap<RatingCreateDTO,  Rating>();
     }
 
     private PersonUserDTO MapUserPerson(User user, UserDTO userDTO)
@@ -59,6 +63,15 @@ public class AutoMapperProfiles : Profile
 
 
         return personUpdateDTO;
+    }
+
+    private RatingArticleDTO MapRatingArticle(Article article, ArticleDTO articleDTO)
+    {
+        return new RatingArticleDTO
+        {
+            Likes = article.Ratings.Select(x => x.Like).Where(x => x == true).Count(),
+            Dislikes = article.Ratings.Select(x => x.DisLike).Where(x => x == true).Count()
+        };
     }
 
     private List<CategoryDTO> MapCategoriesArticle(Article article, ArticleDTO articleDTO)
@@ -114,7 +127,7 @@ public class AutoMapperProfiles : Profile
         var personArticle = new PersonArticleDTO()
         {
             Id = article.PersonId,
-            Email = article.Person.User.Email,
+            Email = article.Person.Email,
             FirstName = article.Person.FirstName,
             LastName = article.Person.LastName,
         };

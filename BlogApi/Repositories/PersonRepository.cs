@@ -12,16 +12,14 @@ namespace ArticlesAPI.Repositories;
 public class PersonRepository : IPersonRepository
 {
     private readonly ApplicationDbContext _context;
-    private readonly IHttpContextAccessor httpContext;
 
-    public PersonRepository(ApplicationDbContext context, IHttpContextAccessor httpContext)
+    public PersonRepository(ApplicationDbContext context)
     {
         this._context = context;
-        this.httpContext = httpContext;
     }
     public async Task<IEnumerable<Person>> GetAll()
     {
-        return await GetPersonQueryable()
+        return await _context.People
             .AsNoTracking()
             .ToListAsync();
     }
@@ -35,20 +33,18 @@ public class PersonRepository : IPersonRepository
     public async Task<IEnumerable<Person>> GetAll(PersonFilter personFilter, IQueryable<Person> queryable)
     {
         PaginationDTO paginationDTO = Utilities.GetPaginationDTO(personFilter);
-        await httpContext.HttpContext.InserPaginationParams(queryable, paginationDTO.RecordsByPage);
-
         return await queryable.Paginate(paginationDTO).ToListAsync();
     }
 
     public async Task<Person> GetById(int id)
     {
-        return await GetPersonQueryable()
+        return await _context.People
             .FirstOrDefaultAsync(x => x.Id == id);
     }
 
     public async Task<Person> GetPersonByUserId(string userId)
     {
-        return await GetPersonQueryable()
+        return await _context.People
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.UserId == userId);
     }
@@ -87,7 +83,7 @@ public class PersonRepository : IPersonRepository
 
     private IQueryable<Person> GetPersonQueryableFilter(PersonFilter personFilter)
     {
-        IQueryable<Person> queryable = GetPersonQueryable().AsNoTracking();
+        IQueryable<Person> queryable = _context.People.AsNoTracking();
 
         if (personFilter == null) return queryable;
 
@@ -121,15 +117,6 @@ public class PersonRepository : IPersonRepository
         }
 
         return queryable;
-    }
-
-    private IQueryable<Person> GetPersonQueryable()
-    {
-        return _context.People
-            .Include(p => p.User)
-            .Include(p => p.Articles)
-            .ThenInclude(a => a.ArticleCategories)
-            .ThenInclude(ac => ac.Category);
     }
 
     protected virtual void Dispose(bool disposing)

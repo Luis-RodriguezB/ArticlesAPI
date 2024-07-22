@@ -1,10 +1,7 @@
 using ArticlesAPI.Config;
-using ArticlesAPI.Repositories;
-using ArticlesAPI.Services;
 using BlogApi;
 using BlogApi.Helpers;
 using BlogApi.Models;
-using BlogApi.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -17,6 +14,7 @@ var configuration = builder.Configuration;
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+    options.UseLazyLoadingProxies();
 });
 
 builder.Services.AddIdentity<User, Role>()

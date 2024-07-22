@@ -1,4 +1,5 @@
-﻿using ArticlesAPI.Interfaces;
+﻿using ArticlesAPI.Entities;
+using ArticlesAPI.Interfaces;
 using System.ComponentModel.DataAnnotations;
 
 namespace BlogApi.Models;
@@ -15,6 +16,15 @@ public class Person : IEntityBase
     public string UserId { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
-    public User User { get; set; }
-    public ICollection<Article> Articles { get; set; }
+    public virtual User User { get; set; }
+    public virtual ICollection<Article> Articles { get; set; }
+    public virtual ICollection<Rating> Ratings { get; set; }
+
+    public string Email
+    {
+        get
+        {
+            return User.Email;
+        }
+    }
 }

@@ -1,4 +1,5 @@
 ﻿using ArticlesAPI.DTOs.Auth;
+using ArticlesAPI.DTOs.Filters;
 using ArticlesAPI.HandleErrors;
 using ArticlesAPI.Services.Interfaces;
 using BlogApi.DTOs.Auth;
@@ -53,9 +54,9 @@ public class AuthController : ControllerBase
 
     [HttpGet]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
-    public async Task<ActionResult<List<UserDTO>>> Get()
+    public async Task<ActionResult<List<UserDTO>>> Get([FromQuery] UserFilter userFilter)
     {
-        return await authService.Get();
+        return await authService.Get(userFilter);
     }
 
     [HttpGet("{id}")]

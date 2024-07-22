@@ -3,5 +3,5 @@
 namespace BlogApi.Models;
 public class User : IdentityUser
 {
-    public Person Person { get; set; }
+    public virtual Person Person { get; set; }
 }

@@ -15,6 +15,7 @@ public static class CustomServiceCollectionExtensions
         services.AddScoped<ICategoryRepository, CategoryRepository>();
         services.AddScoped<IArticleCategoryRepository, ArticleCategoryRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IRatingRepository, RatingRepository>();
 
         // SERVICES
         services.AddScoped<IArticleService, ArticleService>();
@@ -23,6 +24,7 @@ public static class CustomServiceCollectionExtensions
         services.AddScoped<ICategoryService, CategoryService>();
         services.AddScoped<IArticleCategoryService, ArticleCategoryService>();
         services.AddScoped<IUserArticleService, UserArticleService>();
+        services.AddScoped<IRatingService, RatingService>();
 
         return services;
     }

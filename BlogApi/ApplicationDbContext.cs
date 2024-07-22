@@ -21,6 +21,21 @@ public class ApplicationDbContext : IdentityDbContext<User, Role, string>
             .HasForeignKey<Person>(p => p.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        builder.Entity<Rating>()
+            .HasKey(r => new { r.ArticleId, r.PersonId });
+
+        builder.Entity<Rating>()
+            .HasOne(r => r.Person)
+            .WithMany(p => p.Ratings)
+            .HasForeignKey(r => r.PersonId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<Rating>()
+            .HasOne(r => r.Article)
+            .WithMany(p => p.Ratings)
+            .HasForeignKey(r => r.ArticleId)
+            .OnDelete(DeleteBehavior.Cascade);
+
         builder.Entity<ArticleCategory>()
             .HasKey(ac => new { ac.ArticleId, ac.CategoryId });
 
@@ -75,4 +90,5 @@ public class ApplicationDbContext : IdentityDbContext<User, Role, string>
     public DbSet<Person> People { get; set; }
     public DbSet<Category> Categories { get; set; }
     public DbSet<ArticleCategory> ArticleCategories { get; set; }
+    public DbSet<Rating> Ratings { get; set; }
 }

@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace BlogApi.Migrations
+namespace ArticlesAPI.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     partial class ApplicationDbContextModelSnapshot : ModelSnapshot
@@ -17,7 +17,10 @@ namespace BlogApi.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.6")
+                .HasAnnotation("ProductVersion", "8.0.7")
+                .HasAnnotation("Proxies:ChangeTracking", false)
+                .HasAnnotation("Proxies:CheckEquality", false)
+                .HasAnnotation("Proxies:LazyLoading", true)
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -56,6 +59,27 @@ namespace BlogApi.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Categories");
+                });
+
+            modelBuilder.Entity("ArticlesAPI.Entities.Rating", b =>
+                {
+                    b.Property<int>("ArticleId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PersonId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("DisLike")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("Like")
+                        .HasColumnType("bit");
+
+                    b.HasKey("ArticleId", "PersonId");
+
+                    b.HasIndex("PersonId");
+
+                    b.ToTable("Ratings");
                 });
 
             modelBuilder.Entity("BlogApi.Models.Article", b =>
@@ -347,6 +371,25 @@ namespace BlogApi.Migrations
                     b.Navigation("Category");
                 });
 
+            modelBuilder.Entity("ArticlesAPI.Entities.Rating", b =>
+                {
+                    b.HasOne("BlogApi.Models.Article", "Article")
+                        .WithMany("Ratings")
+                        .HasForeignKey("ArticleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BlogApi.Models.Person", "Person")
+                        .WithMany("Ratings")
+                        .HasForeignKey("PersonId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Article");
+
+                    b.Navigation("Person");
+                });
+
             modelBuilder.Entity("BlogApi.Models.Article", b =>
                 {
                     b.HasOne("BlogApi.Models.Person", "Person")
@@ -427,11 +470,15 @@ namespace BlogApi.Migrations
             modelBuilder.Entity("BlogApi.Models.Article", b =>
                 {
                     b.Navigation("ArticleCategories");
+
+                    b.Navigation("Ratings");
                 });
 
             modelBuilder.Entity("BlogApi.Models.Person", b =>
                 {
                     b.Navigation("Articles");
+
+                    b.Navigation("Ratings");
                 });
 
             modelBuilder.Entity("BlogApi.Models.User", b =>

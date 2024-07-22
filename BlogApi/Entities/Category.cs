@@ -8,5 +8,5 @@ public class Category
     [StringLength(80)]
     public string Name { get; set; }
     public string NameNormalized { get; set; }
-    public ICollection<ArticleCategory> ArticleCategories { get; set; }
+    public virtual ICollection<ArticleCategory> ArticleCategories { get; set; }
 }

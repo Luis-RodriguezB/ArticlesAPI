@@ -1,5 +1,6 @@
 ﻿using ArticlesAPI.DTOs.Category;
 using ArticlesAPI.DTOs.Person;
+using ArticlesAPI.DTOs.Rating;
 
 namespace BlogApi.DTOs.Blog;
 
@@ -12,4 +13,5 @@ public class ArticleDTO
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
     public List<CategoryDTO> Categories { get; set; }
+    public RatingArticleDTO Rating { get; set; }
 }

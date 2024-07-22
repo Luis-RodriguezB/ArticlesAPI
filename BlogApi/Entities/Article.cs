@@ -15,6 +15,7 @@ public class Article : IEntityBase
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
     public int PersonId { get; set; }
-    public Person Person { get; set; }
-    public ICollection<ArticleCategory> ArticleCategories { get; set; }
+    public virtual Person Person { get; set; }
+    public virtual ICollection<ArticleCategory> ArticleCategories { get; set; }
+    public virtual ICollection<Rating> Ratings { get; set; }
 }
